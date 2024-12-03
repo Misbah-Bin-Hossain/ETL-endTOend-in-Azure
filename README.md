@@ -71,3 +71,16 @@ This project is licensed under the MIT License.
 
 ---
 For any questions or feedback, feel free to contact me via GitHub Issues.
+
+Few Examples of my dashboard:
+<img width="567" alt="{9F9AEED4-30C4-4872-97A2-B9DC43BB04D3}" src="https://github.com/user-attachments/assets/0c34bdee-d42e-458a-a3a3-14c11379d2ef">
+
+<img width="566" alt="{20E0D79F-4111-4A0E-B035-95B5E89DA5E8}" src="https://github.com/user-attachments/assets/dc9f83bf-6d95-483e-badf-6bad8503492d">
+
+<img width="601" alt="{4313CDBC-F6C8-46C5-B9B8-A62329A9ACC5}" src="https://github.com/user-attachments/assets/c921e9dc-c756-4cad-ae38-8d8df16005aa">
+
+<img width="601" alt="{25DC5AE1-D545-4746-9EAB-DE91347DB05F}" src="https://github.com/user-attachments/assets/0fe79df6-2c4d-4c1b-9e3c-14c6eb312964">
+
+
+
+
