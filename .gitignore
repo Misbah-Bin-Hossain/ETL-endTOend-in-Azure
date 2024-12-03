@@ -1,0 +1,21 @@
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Environment variables and secrets
+.env
+secrets.env
+*.env
+
+# Jupyter notebooks with sensitive data
+*_secrets.ipynb
+*_credentials.ipynb
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class 
