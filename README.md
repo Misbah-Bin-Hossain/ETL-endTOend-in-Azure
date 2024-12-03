@@ -5,6 +5,9 @@ This project implements an end-to-end ETL (Extract, Transform, Load) pipeline to
 
 ## Project Workflow
 
+![Diagram](https://github.com/user-attachments/assets/3399d4ae-8924-4b10-bfcb-4e2ef53721b8)
+
+
 1. **Data Extraction**
    - Extracted data from a football API using Azure Data Factory.
    - Configured dynamic pipelines to handle different parameters (e.g., league, season, filter type).
