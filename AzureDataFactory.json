@@ -1,0 +1,1340 @@
+{
+    "name": "ETL_Football",
+    "properties": {
+        "activities": [
+            {
+                "name": "Lookup1",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "select filter, league, season \nfrom [dbo].[FootballParameters]\n",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "dataset": {
+                        "referenceName": "AzureSqlTable1",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": false
+                }
+            },
+            {
+                "name": "ForEach1",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "Lookup1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('Lookup1').output.value",
+                        "type": "Expression"
+                    },
+                    "isSequential": true,
+                    "activities": [
+                        {
+                            "name": "Switch1",
+                            "type": "Switch",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "on": {
+                                    "value": "@item().filter",
+                                    "type": "Expression"
+                                },
+                                "cases": [
+                                    {
+                                        "value": "standings",
+                                        "activities": [
+                                            {
+                                                "name": "Copy data -Standing",
+                                                "type": "Copy",
+                                                "dependsOn": [
+                                                    {
+                                                        "activity": "Wait_Standing",
+                                                        "dependencyConditions": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                ],
+                                                "policy": {
+                                                    "timeout": "0.12:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "RestSource",
+                                                        "httpRequestTimeout": "00:01:40",
+                                                        "requestInterval": "00.00:00:01.000",
+                                                        "requestMethod": "GET",
+                                                        "paginationRules": {
+                                                            "supportRFC5988": "true"
+                                                        }
+                                                    },
+                                                    "sink": {
+                                                        "type": "ParquetSink",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSWriteSettings",
+                                                            "copyBehavior": "FlattenHierarchy"
+                                                        },
+                                                        "formatSettings": {
+                                                            "type": "ParquetWriteSettings"
+                                                        }
+                                                    },
+                                                    "enableStaging": false,
+                                                    "translator": {
+                                                        "type": "TabularTranslator",
+                                                        "mappings": [
+                                                            {
+                                                                "source": {
+                                                                    "path": "['position']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "position"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "team_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "team_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['shortName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "shortName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['tla']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "tla"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['playedGames']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "playedGames"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['form']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "form"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['won']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "won"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['draw']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "draw"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['lost']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "lost"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['points']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "points"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['goalsFor']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "goalsFor"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['goalsAgainst']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "goalsAgainst"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['goalDifference']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "goalDifference"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['filters']['season']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "season"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['area']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "area_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['area']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "area_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['area']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "area_code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['type']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_type"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "season_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['startDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "startDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['endDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "endDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['currentMatchday']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "currentMatchday"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "collectionReference": "$['standings'][0]['table']"
+                                                    }
+                                                },
+                                                "inputs": [
+                                                    {
+                                                        "referenceName": "Dynamic_import",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Filter": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Season": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "League": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                                "outputs": [
+                                                    {
+                                                        "referenceName": "Standing",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Fil": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Sea": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "lea": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "Wait_Standing",
+                                                "type": "Wait",
+                                                "dependsOn": [],
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "waitTimeInSeconds": 6
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "scorers",
+                                        "activities": [
+                                            {
+                                                "name": "Copy data -Top Scorar",
+                                                "type": "Copy",
+                                                "dependsOn": [
+                                                    {
+                                                        "activity": "Wait_Scoreres",
+                                                        "dependencyConditions": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                ],
+                                                "policy": {
+                                                    "timeout": "0.12:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "RestSource",
+                                                        "httpRequestTimeout": "00:01:40",
+                                                        "requestInterval": "00.00:00:00.010",
+                                                        "requestMethod": "GET",
+                                                        "paginationRules": {
+                                                            "supportRFC5988": "true"
+                                                        }
+                                                    },
+                                                    "sink": {
+                                                        "type": "ParquetSink",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSWriteSettings",
+                                                            "copyBehavior": "FlattenHierarchy"
+                                                        },
+                                                        "formatSettings": {
+                                                            "type": "ParquetWriteSettings"
+                                                        }
+                                                    },
+                                                    "enableStaging": false,
+                                                    "translator": {
+                                                        "type": "TabularTranslator",
+                                                        "mappings": [
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "player_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "player_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['firstName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "firstName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['lastName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "lastName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['dateOfBirth']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "dateOfBirth"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['nationality']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "nationality"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['section']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "section"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['position']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "position",
+                                                                    "type": "String"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['shirtNumber']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "shirtNumber",
+                                                                    "type": "Int64"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['player']['lastUpdated']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "player_lastUpdated"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "team_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "team_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['shortName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "shortName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['team']['tla']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "tla"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['playedMatches']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "playedMatches"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['goals']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "goals"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['assists']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "assists",
+                                                                    "type": "Int64"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['penalties']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "penalties",
+                                                                    "type": "Int64"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['filters']['season']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "season"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['filters']['limit']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "limit"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['type']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "type"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "season_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['startDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "startDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['endDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "endDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['season']['currentMatchday']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "currentMatchday"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "collectionReference": "$['scorers']"
+                                                    }
+                                                },
+                                                "inputs": [
+                                                    {
+                                                        "referenceName": "Dynamic_import",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Filter": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Season": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "League": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                                "outputs": [
+                                                    {
+                                                        "referenceName": "Parquet_Topscorer",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Fil": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Sea": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Lea": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "Wait_Scoreres",
+                                                "type": "Wait",
+                                                "dependsOn": [],
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "waitTimeInSeconds": 6
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "teams",
+                                        "activities": [
+                                            {
+                                                "name": "Wait_Teams",
+                                                "type": "Wait",
+                                                "dependsOn": [],
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "waitTimeInSeconds": 6
+                                                }
+                                            },
+                                            {
+                                                "name": "Dataflow_Teams",
+                                                "type": "ExecuteDataFlow",
+                                                "dependsOn": [
+                                                    {
+                                                        "activity": "Wait_Teams",
+                                                        "dependencyConditions": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                ],
+                                                "policy": {
+                                                    "timeout": "0.12:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "dataflow": {
+                                                        "referenceName": "dataflow1",
+                                                        "type": "DataFlowReference",
+                                                        "parameters": {
+                                                            "Fil": {
+                                                                "value": "'@{item().filter}'",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Sea": {
+                                                                "value": "'@{item().Season}'",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Lea": {
+                                                                "value": "'@{item().League}'",
+                                                                "type": "Expression"
+                                                            }
+                                                        },
+                                                        "datasetParameters": {
+                                                            "source1": {
+                                                                "Filter": {
+                                                                    "value": "@item().filter",
+                                                                    "type": "Expression"
+                                                                },
+                                                                "Season": {
+                                                                    "value": "@item().season",
+                                                                    "type": "Expression"
+                                                                },
+                                                                "League": {
+                                                                    "value": "@item().league",
+                                                                    "type": "Expression"
+                                                                }
+                                                            },
+                                                            "SinkSquad": {
+                                                                "Fil": "@item().filter",
+                                                                "Sea": "@item().season",
+                                                                "Lea": "@item().league"
+                                                            },
+                                                            "SinkTeam": {
+                                                                "Fil": "@item().filter",
+                                                                "Sea": "@item().season",
+                                                                "Lea": "@item().league"
+                                                            },
+                                                            "SinkRunningCompitition": {
+                                                                "Fil": "@item().filter",
+                                                                "Sea": "@item().season",
+                                                                "Lea": "@item().league"
+                                                            }
+                                                        }
+                                                    },
+                                                    "compute": {
+                                                        "coreCount": 16,
+                                                        "computeType": "General"
+                                                    },
+                                                    "traceLevel": "Fine"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "matches",
+                                        "activities": [
+                                            {
+                                                "name": "Copy data -Matches",
+                                                "type": "Copy",
+                                                "dependsOn": [
+                                                    {
+                                                        "activity": "Wait_Matches",
+                                                        "dependencyConditions": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                ],
+                                                "policy": {
+                                                    "timeout": "0.12:00:00",
+                                                    "retry": 0,
+                                                    "retryIntervalInSeconds": 30,
+                                                    "secureOutput": false,
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "RestSource",
+                                                        "httpRequestTimeout": "00:01:40",
+                                                        "requestInterval": "00.00:00:00.010",
+                                                        "requestMethod": "GET",
+                                                        "paginationRules": {
+                                                            "supportRFC5988": "true"
+                                                        }
+                                                    },
+                                                    "sink": {
+                                                        "type": "ParquetSink",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSWriteSettings",
+                                                            "copyBehavior": "FlattenHierarchy"
+                                                        },
+                                                        "formatSettings": {
+                                                            "type": "ParquetWriteSettings"
+                                                        }
+                                                    },
+                                                    "enableStaging": false,
+                                                    "translator": {
+                                                        "type": "TabularTranslator",
+                                                        "mappings": [
+                                                            {
+                                                                "source": {
+                                                                    "path": "['area']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['area_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['area']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['area_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['area']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['area_code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['area']['flag']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "flag"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['competition']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['competition_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['competition']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['competition_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['competition']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['competition_code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['competition']['type']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['competition_type"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['competition']['emblem']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['competition_emblem"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['season']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['season_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['season']['startDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "startDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['season']['endDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "endDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['season']['currentMatchday']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "currentMatchday"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['utcDate']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "utcDate"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['status']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "status"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['matchday']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matchday"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['stage']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "stage"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['lastUpdated']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "lastUpdated"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['homeTeam']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['homeTeam_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['homeTeam']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['homeTeam_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['homeTeam']['shortName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['homeTeam_shortName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['homeTeam']['tla']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['homeTeam_tla"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['homeTeam']['crest']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['homeTeam_crest"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['awayTeam']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['awayTeam_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['awayTeam']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['awayTeam_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['awayTeam']['shortName']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['awayTeam_shortName"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['awayTeam']['tla']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['awayTeam_tla"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['awayTeam']['crest']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['awayTeam_crest"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['winner']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['score_winner"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['duration']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "duration"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['fullTime']['home']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['score_fullTime_home"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['fullTime']['away']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['score_fullTime_away"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['halfTime']['home']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['score_halfTime_home"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['score']['halfTime']['away']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "matches'][0]['score_halfTime_away"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "['odds']['msg']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "msg"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['filters']['season']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "season"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['resultSet']['count']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "count"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['resultSet']['first']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "first"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['resultSet']['last']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "last"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['resultSet']['played']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "played"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['id']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_id"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['name']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_name"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['code']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_code"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['type']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_type"
+                                                                }
+                                                            },
+                                                            {
+                                                                "source": {
+                                                                    "path": "$['competition']['emblem']"
+                                                                },
+                                                                "sink": {
+                                                                    "name": "competition_emblem"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "collectionReference": "$['matches']"
+                                                    }
+                                                },
+                                                "inputs": [
+                                                    {
+                                                        "referenceName": "Dynamic_import",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Filter": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Season": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "League": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                                "outputs": [
+                                                    {
+                                                        "referenceName": "Parquet_Matches",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "Fil": {
+                                                                "value": "@item().filter",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Sea": {
+                                                                "value": "@item().season",
+                                                                "type": "Expression"
+                                                            },
+                                                            "Lea": {
+                                                                "value": "@item().league",
+                                                                "type": "Expression"
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "Wait_Matches",
+                                                "type": "Wait",
+                                                "dependsOn": [],
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "waitTimeInSeconds": 6
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Bronze to Silver",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "ForEach1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/misbahbinhossain111@gmail.com/Bronze to Silver"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Silver to Gold",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Bronze to Silver",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/misbahbinhossain111@gmail.com/Silver to gold"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "season": {
+                "type": "string",
+                "defaultValue": "2022,2023,2024"
+            },
+            "league": {
+                "type": "string",
+                "defaultValue": "PL,SA,PD,BL1"
+            },
+            "filter": {
+                "type": "string",
+                "defaultValue": "matches,standings,teams,scorers"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2024-11-28T10:13:19Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
