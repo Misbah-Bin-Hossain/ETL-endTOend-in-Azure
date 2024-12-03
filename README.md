@@ -14,7 +14,7 @@ This project implements an end-to-end ETL (Extract, Transform, Load) pipeline to
    - Stored API responses as Parquet files in Azure Blob Storage.
 
 2. **Data Transformation**
-   - Processed the data in Databricks through two notebooks:
+   - Processed the data in Databricks through two notebooks ( Medallion Architecture ) :
      - **Bronze to Silver**: Cleaned and normalized raw API data.
      - **Silver to Gold**: Performed advanced transformations and created analysis-ready datasets.
 
