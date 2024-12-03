@@ -73,6 +73,7 @@ This project is licensed under the MIT License.
 For any questions or feedback, feel free to contact me via GitHub Issues.
 
 Few Examples of my dashboard:
+
 <img width="567" alt="{9F9AEED4-30C4-4872-97A2-B9DC43BB04D3}" src="https://github.com/user-attachments/assets/0c34bdee-d42e-458a-a3a3-14c11379d2ef">
 
 <img width="566" alt="{20E0D79F-4111-4A0E-B035-95B5E89DA5E8}" src="https://github.com/user-attachments/assets/dc9f83bf-6d95-483e-badf-6bad8503492d">
